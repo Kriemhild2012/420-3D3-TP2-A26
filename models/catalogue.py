@@ -2,13 +2,17 @@ import json
 from composite import Bundle
 from feuille import ProduitNumerique
 from composant import Composant
-
+from strategie.strategie_tri import StrategieTri
+from strategie.tri_par_nom import TriParNom
+from strategie.tri_par_prix import TriParPrix
+from strategie.tri_par_popularite import TriParPopularite
 
 class Catalogue:
 
-    def __init__(self, chemin_json: str):
+    def __init__(self, chemin_json: str, strategie_tri: StrategieTri = None):
         self._produits: dict[int, Composant] = {}
         self._charger(chemin_json)
+        self._strategie_tri = strategie_tri or TriParNom()  # Stratégie par défaut
 
     def _charger(self, chemin: str) -> None:
         with open(chemin, encoding="utf-8") as f:
@@ -48,21 +52,22 @@ class Catalogue:
     def obtenir(self, id: int):
         return self._produits.get(id)
 
-    def afficher_produits(self, tri: str, affichage: str) -> list[dict]:
+    def definir_strategie_tri(self, strategie):
+        self._strategie_tri = strategie
+
+    def afficher_produits(self) -> list:
+        resultat = self._strategie_tri.trier(self.tous())
         produits = self.tous()
 
-        # Tri
-        if tri == "prix":
-            produits = sorted(produits, key=lambda p: p.prix_total())
-        elif tri == "popularite":
-            produits = sorted(produits, key=lambda p: p.nb_ventes, reverse=True)
-        elif tri == "nom":
-            produits = sorted(produits, key=lambda p: p.nom.lower())
+        # Application du patron Stratégie
+        produits = self._strategie_tri.trier(produits)
 
-        # Affichage
         resultat = []
+
         for p in produits:
+
             if affichage == "compact":
+
                 resultat.append({
                     "id": p.id,
                     "nom": p.nom,
@@ -70,7 +75,9 @@ class Catalogue:
                     "image_url": p.image_url,
                     "est_bundle": p.est_bundle(),
                 })
+
             elif affichage == "detaille":
+
                 donnees = {
                     "id": p.id,
                     "nom": p.nom,
@@ -80,8 +87,28 @@ class Catalogue:
                     "nb_ventes": p.nb_ventes,
                     "est_bundle": p.est_bundle(),
                 }
+
                 if p.est_bundle():
                     donnees["nb_items"] = p.nb_items()
+
                 resultat.append(donnees)
 
         return resultat
+
+  
+catalogue = Catalogue("catalogue.json", TriParPrix())
+
+# Trier par prix
+produits = catalogue.afficher_produits("compact")
+
+# Changer de stratégie : popularité
+catalogue.definir_strategie_tri(TriParPopularite())
+
+# Trier par popularité
+produits = catalogue.afficher_produits("detaille")
+
+# Changer de stratégie : nom
+catalogue.definir_strategie_tri(TriParNom())
+
+# Trier par nom
+produits = catalogue.afficher_produits("compact")
