@@ -20,7 +20,7 @@ class Composite(Composant, ABC):
 
     @override
     def prix_total(self) -> float:
-        return sum(p.prix_total() for p in self.items)
+        return sum(p.prix_total() for p in self.items) * (1 - self.rabais)
 
     @override
     def nb_items(self) -> int:
@@ -31,8 +31,5 @@ class Composite(Composant, ABC):
         return True
 
 class Bundle(Composite):
-    
-    def __init__(self, id: int, nom: str, description: str,
-                 nb_ventes: int, image_url: str, rabais: float = 0.0):
-        super().__init__(id, nom, description, nb_ventes, image_url, rabais)
-        self.prix = self.prix_total() * (1 - rabais)
+    pass
+        
