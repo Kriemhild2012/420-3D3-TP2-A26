@@ -1,12 +1,13 @@
 import json
 from composite import Bundle
 from feuille import ProduitNumerique
+from composant import Composant
 
 
 class Catalogue:
 
     def __init__(self, chemin_json: str):
-        self._produits: dict[int, ProduitNumerique | Bundle] = {}
+        self._produits: dict[int, Composant] = {}
         self._charger(chemin_json)
 
     def _charger(self, chemin: str) -> None:
