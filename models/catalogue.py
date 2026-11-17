@@ -1,11 +1,13 @@
 import json
-from models import ProduitNumerique, Bundle
+from composite import Bundle
+from feuille import ProduitNumerique
+from composant import Composant
 
 
 class Catalogue:
 
     def __init__(self, chemin_json: str):
-        self._produits: dict[int, ProduitNumerique | Bundle] = {}
+        self._produits: dict[int, Composant] = {}
         self._charger(chemin_json)
 
     def _charger(self, chemin: str) -> None:
@@ -27,7 +29,7 @@ class Catalogue:
                     id=d["id"],
                     nom=d["nom"],
                     description=d["description"],
-                    prix=d["prix"],
+                    #prix=d["prix"],
                     nb_ventes=d["nb_ventes"],
                     image_url=d["image_url"],
                     rabais=d.get("rabais", 0.0)
@@ -38,7 +40,7 @@ class Catalogue:
             if d["type"] == "bundle":
                 bundle = self._produits[d["id"]]
                 for enfant_id in d.get("enfants", []):
-                    bundle.ajouter(self._produits[enfant_id])
+                    bundle.ajouter_items(self._produits[enfant_id])
 
     def tous(self) -> list:
         return list(self._produits.values())
