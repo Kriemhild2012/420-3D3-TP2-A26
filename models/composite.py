@@ -7,15 +7,16 @@ class Composite(Composant, ABC):
     """Nœud intermédiaire — délègue à ses enfants."""
 
     def __init__(self, id: int, nom: str, description: str,
-                 nb_ventes: int, image_url: str):
+                 nb_ventes: int, image_url: str, rabais: float = 0.0):
         super().__init__(id, nom, description, nb_ventes, image_url)
         self.items: list[Composant] = []
+        self.rabais = rabais
 
-    def ajouter_items(self, piece: Composant) -> None:
-        self.items.append(piece)
+    def ajouter_items(self, item: Composant) -> None:
+        self.items.append(item)
 
-    def retirer_items(self, piece: Composant) -> None:
-        self.items.remove(piece)
+    def retirer_items(self, item: Composant) -> None:
+        self.items.remove(item)
 
     @override
     def prix_total(self) -> float:
@@ -30,4 +31,8 @@ class Composite(Composant, ABC):
         return True
 
 class Bundle(Composite):
-    pass
+    
+    def __init__(self, id: int, nom: str, description: str,
+                 nb_ventes: int, image_url: str, rabais: float = 0.0):
+        super().__init__(id, nom, description, nb_ventes, image_url, rabais)
+        self.prix = self.prix_total() * (1 - rabais)
